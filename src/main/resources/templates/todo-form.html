@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head(${isEdit} ? 'Edit Todo' : 'New Todo')"></head>
+<body>
+<header th:replace="fragments/layout :: header"></header>
+
+<div class="container">
+    <div class="form-container">
+        <h2 th:text="${isEdit} ? 'Edit Todo' : 'Create New Todo'">Form Title</h2>
+
+        <form th:action="${isEdit} ? @{/todos/{id}/edit(id=${todoId})} : @{/todos/new}"
+              th:object="${todoRequest}" method="post">
+
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <input type="text" id="title" th:field="*{title}" placeholder="What needs to be done?"
+                       required maxlength="255">
+                <div th:if="${#fields.hasErrors('title')}" class="error-message"
+                     th:errors="*{title}">Title error</div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}"
+                          placeholder="Add more details..." maxlength="2000"></textarea>
+                <div th:if="${#fields.hasErrors('description')}" class="error-message"
+                     th:errors="*{description}">Description error</div>
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority *</label>
+                <select id="priority" th:field="*{priority}" required>
+                    <option th:each="p : ${priorities}" th:value="${p}" th:text="${p.displayName}"></option>
+                </select>
+            </div>
+
+            <div th:if="${isEdit}" class="form-group">
+                <label for="status">Status *</label>
+                <select id="status" th:field="*{status}" required>
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dueDate">Due Date</label>
+                <input type="datetime-local" id="dueDate" th:field="*{dueDate}">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"
+                        th:text="${isEdit} ? 'Update Todo' : 'Create Todo'">Save</button>
+                <a th:href="@{/}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
