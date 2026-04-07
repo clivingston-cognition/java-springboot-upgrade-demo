@@ -140,12 +140,12 @@ The application starts on **http://localhost:8080**.
 
 | Test Class                  | Coverage Area                                   | Tests |
 |-----------------------------|------------------------------------------------|-------|
-| `TodoApiControllerTest`     | REST API endpoints (MockMvc + mocked service)   | 15    |
-| `TodoServiceTest`           | Business logic (unit tests with Mockito)         | 14    |
-| `TodoRepositoryTest`        | JPA queries (DataJpaTest with H2)                | 10    |
-| `TodoIntegrationTest`       | Full stack E2E (SpringBootTest + MockMvc)        | 8     |
+| `TodoApiControllerTest`     | REST API endpoints (MockMvc + mocked service)   | 18    |
+| `TodoServiceTest`           | Business logic (unit tests with Mockito)         | 16    |
+| `TodoRepositoryTest`        | JPA queries (DataJpaTest with H2)                | 11    |
+| `TodoIntegrationTest`       | Full stack E2E (SpringBootTest + MockMvc)        | 9     |
 | `TodoApplicationTests`      | Spring context loading                           | 1     |
-| **Total**                   |                                                  | **48**|
+| **Total**                   |                                                  | **63**|
 
 ---
 
