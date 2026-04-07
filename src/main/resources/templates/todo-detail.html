@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Todo Details')"></head>
+<body>
+<header th:replace="fragments/layout :: header"></header>
+
+<div class="container">
+    <div class="detail-container">
+        <h2 th:text="${todo.title}">Todo Title</h2>
+
+        <div class="detail-row">
+            <span class="detail-label">Status</span>
+            <span class="detail-value">
+                <span th:class="'badge badge-' + ${#strings.toLowerCase(#strings.replace(todo.status.displayName, ' ', '-'))}"
+                      th:text="${todo.status.displayName}">Status</span>
+            </span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Priority</span>
+            <span class="detail-value">
+                <span th:class="'badge badge-' + ${#strings.toLowerCase(todo.priority.displayName)}"
+                      th:text="${todo.priority.displayName}">Priority</span>
+            </span>
+        </div>
+
+        <div th:if="${todo.description}" class="detail-row">
+            <span class="detail-label">Description</span>
+            <span class="detail-value" th:text="${todo.description}">Description text</span>
+        </div>
+
+        <div th:if="${todo.dueDate}" class="detail-row">
+            <span class="detail-label">Due Date</span>
+            <span class="detail-value"
+                  th:classappend="${todo.overdue} ? 'todo-date overdue' : ''"
+                  th:text="${todo.dueDate}">Due date</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Created</span>
+            <span class="detail-value" th:text="${todo.createdAt}">Created at</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Last Updated</span>
+            <span class="detail-value" th:text="${todo.updatedAt}">Updated at</span>
+        </div>
+
+        <div th:if="${todo.completedAt}" class="detail-row">
+            <span class="detail-label">Completed</span>
+            <span class="detail-value" th:text="${todo.completedAt}">Completed at</span>
+        </div>
+
+        <div class="detail-actions">
+            <a th:href="@{/todos/{id}/edit(id=${todo.id})}" class="btn btn-primary">Edit</a>
+            <form th:action="@{/todos/{id}/toggle(id=${todo.id})}" method="post" style="display:inline;">
+                <button type="submit"
+                        th:class="'btn ' + (${todo.status.name() == 'COMPLETED'} ? 'btn-outline' : 'btn-success')"
+                        th:text="${todo.status.name() == 'COMPLETED'} ? 'Mark Incomplete' : 'Mark Complete'">Toggle</button>
+            </form>
+            <form th:action="@{/todos/{id}/delete(id=${todo.id})}" method="post" style="display:inline;"
+                  onsubmit="return confirm('Are you sure?');">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+            <a th:href="@{/}" class="btn btn-outline">Back to List</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
