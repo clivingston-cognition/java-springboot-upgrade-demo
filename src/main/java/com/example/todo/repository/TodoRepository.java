@@ -22,8 +22,11 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     Page<Todo> findByStatusAndPriority(TodoStatus status, Priority priority, Pageable pageable);
 
-    @Query("SELECT t FROM Todo t WHERE LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    @Query("""
+            SELECT t FROM Todo t
+            WHERE LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+               OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            """)
     Page<Todo> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     List<Todo> findByDueDateBeforeAndStatusNot(LocalDateTime dateTime, TodoStatus status);

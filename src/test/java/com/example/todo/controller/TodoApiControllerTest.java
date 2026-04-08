@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
@@ -49,7 +49,7 @@ class TodoApiControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private TodoService todoService;
 
     @Autowired
@@ -60,14 +60,9 @@ class TodoApiControllerTest {
 
     @BeforeEach
     void setUp() {
-        sampleResponse = new TodoResponse();
-        sampleResponse.setId(1L);
-        sampleResponse.setTitle("Test Todo");
-        sampleResponse.setDescription("Test description");
-        sampleResponse.setStatus(TodoStatus.PENDING);
-        sampleResponse.setPriority(Priority.MEDIUM);
-        sampleResponse.setCreatedAt("2024-01-01 10:00");
-        sampleResponse.setUpdatedAt("2024-01-01 10:00");
+        sampleResponse = new TodoResponse(1L, "Test Todo", "Test description",
+                TodoStatus.PENDING, Priority.MEDIUM, null,
+                "2024-01-01 10:00", "2024-01-01 10:00", null, false);
 
         sampleRequest = new TodoRequest();
         sampleRequest.setTitle("Test Todo");
@@ -137,13 +132,9 @@ class TodoApiControllerTest {
             sampleRequest.setPriority(Priority.HIGH);
             sampleRequest.setStatus(TodoStatus.IN_PROGRESS);
 
-            TodoResponse fullResponse = new TodoResponse();
-            fullResponse.setId(2L);
-            fullResponse.setTitle("Test Todo");
-            fullResponse.setDescription("Test description");
-            fullResponse.setStatus(TodoStatus.IN_PROGRESS);
-            fullResponse.setPriority(Priority.HIGH);
-            fullResponse.setDueDate("2024-12-31 23:59");
+            TodoResponse fullResponse = new TodoResponse(2L, "Test Todo", "Test description",
+                    TodoStatus.IN_PROGRESS, Priority.HIGH, "2024-12-31 23:59",
+                    null, null, null, false);
 
             when(todoService.createTodo(any(TodoRequest.class))).thenReturn(fullResponse);
 
@@ -260,12 +251,9 @@ class TodoApiControllerTest {
         @Test
         @DisplayName("Should update todo and return 200")
         void shouldUpdateTodo() throws Exception {
-            TodoResponse updatedResponse = new TodoResponse();
-            updatedResponse.setId(1L);
-            updatedResponse.setTitle("Updated Title");
-            updatedResponse.setDescription("Updated description");
-            updatedResponse.setStatus(TodoStatus.IN_PROGRESS);
-            updatedResponse.setPriority(Priority.HIGH);
+            TodoResponse updatedResponse = new TodoResponse(1L, "Updated Title", "Updated description",
+                    TodoStatus.IN_PROGRESS, Priority.HIGH, null,
+                    null, null, null, false);
 
             sampleRequest.setTitle("Updated Title");
             sampleRequest.setDescription("Updated description");
@@ -316,10 +304,9 @@ class TodoApiControllerTest {
         @Test
         @DisplayName("Should toggle todo completion status")
         void shouldToggleComplete() throws Exception {
-            TodoResponse toggledResponse = new TodoResponse();
-            toggledResponse.setId(1L);
-            toggledResponse.setTitle("Test Todo");
-            toggledResponse.setStatus(TodoStatus.COMPLETED);
+            TodoResponse toggledResponse = new TodoResponse(1L, "Test Todo", null,
+                    TodoStatus.COMPLETED, null, null,
+                    null, null, null, false);
 
             when(todoService.toggleComplete(1L)).thenReturn(toggledResponse);
 
