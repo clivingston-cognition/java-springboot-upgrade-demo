@@ -2,7 +2,6 @@ package com.example.todo.controller;
 
 import com.example.todo.dto.TodoRequest;
 import com.example.todo.dto.TodoResponse;
-import com.example.todo.exception.TodoNotFoundException;
 import com.example.todo.model.Priority;
 import com.example.todo.model.TodoStatus;
 import com.example.todo.service.TodoService;
