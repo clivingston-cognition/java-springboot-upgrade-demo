@@ -404,4 +404,38 @@ class TodoServiceTest {
             assertThat(result.getContent()).hasSize(1);
         }
     }
+
+    @Nested
+    @DisplayName("Get Todos By Status")
+    class GetTodosByStatusTests {
+
+        @Test
+        @DisplayName("Should return todos filtered by status")
+        void shouldReturnTodosByStatus() {
+            Page<Todo> page = new PageImpl<>(Arrays.asList(sampleTodo));
+            when(todoRepository.findByStatus(eq(TodoStatus.PENDING), any(Pageable.class))).thenReturn(page);
+
+            Page<TodoResponse> result = todoService.getTodosByStatus(TodoStatus.PENDING, 0, 10);
+
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent().get(0).getStatus()).isEqualTo(TodoStatus.PENDING);
+        }
+    }
+
+    @Nested
+    @DisplayName("Get Todos By Priority")
+    class GetTodosByPriorityTests {
+
+        @Test
+        @DisplayName("Should return todos filtered by priority")
+        void shouldReturnTodosByPriority() {
+            Page<Todo> page = new PageImpl<>(Arrays.asList(sampleTodo));
+            when(todoRepository.findByPriority(eq(Priority.MEDIUM), any(Pageable.class))).thenReturn(page);
+
+            Page<TodoResponse> result = todoService.getTodosByPriority(Priority.MEDIUM, 0, 10);
+
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent().get(0).getPriority()).isEqualTo(Priority.MEDIUM);
+        }
+    }
 }
