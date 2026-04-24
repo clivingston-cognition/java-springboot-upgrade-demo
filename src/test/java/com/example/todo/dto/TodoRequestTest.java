@@ -1,0 +1,53 @@
+package com.example.todo.dto;
+
+import com.example.todo.model.Priority;
+import com.example.todo.model.TodoStatus;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DisplayName("TodoRequest Tests")
+class TodoRequestTest {
+
+    @Test
+    @DisplayName("Default constructor should set default priority and status")
+    void defaultConstructor() {
+        TodoRequest request = new TodoRequest();
+
+        assertThat(request.getPriority()).isEqualTo(Priority.MEDIUM);
+        assertThat(request.getStatus()).isEqualTo(TodoStatus.PENDING);
+        assertThat(request.getTitle()).isNull();
+        assertThat(request.getDescription()).isNull();
+        assertThat(request.getDueDate()).isNull();
+    }
+
+    @Test
+    @DisplayName("All-args constructor should set all fields")
+    void allArgsConstructor() {
+        TodoRequest request = new TodoRequest("Title", "Desc", Priority.HIGH, TodoStatus.IN_PROGRESS, "2024-12-31T23:59");
+
+        assertThat(request.getTitle()).isEqualTo("Title");
+        assertThat(request.getDescription()).isEqualTo("Desc");
+        assertThat(request.getPriority()).isEqualTo(Priority.HIGH);
+        assertThat(request.getStatus()).isEqualTo(TodoStatus.IN_PROGRESS);
+        assertThat(request.getDueDate()).isEqualTo("2024-12-31T23:59");
+    }
+
+    @Test
+    @DisplayName("Setters should work correctly")
+    void settersShouldWork() {
+        TodoRequest request = new TodoRequest();
+        request.setTitle("New Title");
+        request.setDescription("New Desc");
+        request.setPriority(Priority.CRITICAL);
+        request.setStatus(TodoStatus.CANCELLED);
+        request.setDueDate("2025-06-15T10:00");
+
+        assertThat(request.getTitle()).isEqualTo("New Title");
+        assertThat(request.getDescription()).isEqualTo("New Desc");
+        assertThat(request.getPriority()).isEqualTo(Priority.CRITICAL);
+        assertThat(request.getStatus()).isEqualTo(TodoStatus.CANCELLED);
+        assertThat(request.getDueDate()).isEqualTo("2025-06-15T10:00");
+    }
+}

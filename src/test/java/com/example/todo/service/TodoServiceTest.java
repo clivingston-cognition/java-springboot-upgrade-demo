@@ -106,6 +106,18 @@ class TodoServiceTest {
         }
 
         @Test
+        @DisplayName("Should create todo with empty due date string")
+        void shouldCreateTodoWithEmptyDueDate() {
+            sampleRequest.setDueDate("");
+            when(todoRepository.save(any(Todo.class))).thenReturn(sampleTodo);
+
+            TodoResponse response = todoService.createTodo(sampleRequest);
+
+            assertThat(response).isNotNull();
+            verify(todoRepository).save(any(Todo.class));
+        }
+
+        @Test
         @DisplayName("Should create todo with null status defaulting to PENDING")
         void shouldDefaultToPendingWhenStatusNull() {
             sampleRequest.setStatus(null);
@@ -141,6 +153,38 @@ class TodoServiceTest {
             assertThatThrownBy(() -> todoService.getTodoById(999L))
                     .isInstanceOf(TodoNotFoundException.class)
                     .hasMessageContaining("999");
+        }
+    }
+
+    @Nested
+    @DisplayName("Get Todos By Status")
+    class GetTodosByStatusTests {
+
+        @Test
+        @DisplayName("Should return todos filtered by status")
+        void shouldReturnTodosByStatus() {
+            Page<Todo> page = new PageImpl<>(Arrays.asList(sampleTodo));
+            when(todoRepository.findByStatus(eq(TodoStatus.PENDING), any(Pageable.class))).thenReturn(page);
+
+            Page<TodoResponse> result = todoService.getTodosByStatus(TodoStatus.PENDING, 0, 10);
+
+            assertThat(result.getContent()).hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("Get Todos By Priority")
+    class GetTodosByPriorityTests {
+
+        @Test
+        @DisplayName("Should return todos filtered by priority")
+        void shouldReturnTodosByPriority() {
+            Page<Todo> page = new PageImpl<>(Arrays.asList(sampleTodo));
+            when(todoRepository.findByPriority(eq(Priority.HIGH), any(Pageable.class))).thenReturn(page);
+
+            Page<TodoResponse> result = todoService.getTodosByPriority(Priority.HIGH, 0, 10);
+
+            assertThat(result.getContent()).hasSize(1);
         }
     }
 
@@ -201,6 +245,23 @@ class TodoServiceTest {
             assertThat(response.getTitle()).isEqualTo("Updated Title");
             assertThat(response.getPriority()).isEqualTo(Priority.HIGH);
             assertThat(response.getStatus()).isEqualTo(TodoStatus.IN_PROGRESS);
+            verify(todoRepository).save(any(Todo.class));
+        }
+
+        @Test
+        @DisplayName("Should clear due date when empty string")
+        void shouldClearDueDateWhenEmpty() {
+            TodoRequest updateRequest = new TodoRequest();
+            updateRequest.setTitle("Test");
+            updateRequest.setPriority(Priority.MEDIUM);
+            updateRequest.setStatus(TodoStatus.PENDING);
+            updateRequest.setDueDate("");
+
+            when(todoRepository.findById(1L)).thenReturn(Optional.of(sampleTodo));
+            when(todoRepository.save(any(Todo.class))).thenReturn(sampleTodo);
+
+            todoService.updateTodo(1L, updateRequest);
+
             verify(todoRepository).save(any(Todo.class));
         }
 
