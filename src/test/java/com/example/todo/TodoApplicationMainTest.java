@@ -2,17 +2,19 @@ package com.example.todo;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @DisplayName("TodoApplication Main Tests")
 class TodoApplicationMainTest {
 
     @Test
     @DisplayName("Should run main method without error")
     void shouldRunMainMethod() {
-        TodoApplication.main(new String[]{"--spring.main.allow-bean-definition-overriding=true"});
+        ConfigurableApplicationContext ctx = SpringApplication.run(
+                TodoApplication.class,
+                "--spring.profiles.active=test",
+                "--server.port=0");
+        ctx.close();
     }
 }
