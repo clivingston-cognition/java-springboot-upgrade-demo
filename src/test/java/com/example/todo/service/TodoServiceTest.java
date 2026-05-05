@@ -54,11 +54,8 @@ class TodoServiceTest {
         sampleTodo.setCreatedAt(LocalDateTime.now());
         sampleTodo.setUpdatedAt(LocalDateTime.now());
 
-        sampleRequest = new TodoRequest();
-        sampleRequest.setTitle("Test Todo");
-        sampleRequest.setDescription("Test description");
-        sampleRequest.setPriority(Priority.MEDIUM);
-        sampleRequest.setStatus(TodoStatus.PENDING);
+        sampleRequest = new TodoRequest("Test Todo", "Test description",
+                Priority.MEDIUM, TodoStatus.PENDING, null);
     }
 
     @Nested
@@ -73,47 +70,51 @@ class TodoServiceTest {
             TodoResponse response = todoService.createTodo(sampleRequest);
 
             assertThat(response).isNotNull();
-            assertThat(response.getTitle()).isEqualTo("Test Todo");
-            assertThat(response.getDescription()).isEqualTo("Test description");
-            assertThat(response.getPriority()).isEqualTo(Priority.MEDIUM);
+            assertThat(response.title()).isEqualTo("Test Todo");
+            assertThat(response.description()).isEqualTo("Test description");
+            assertThat(response.priority()).isEqualTo(Priority.MEDIUM);
             verify(todoRepository).save(any(Todo.class));
         }
 
         @Test
         @DisplayName("Should create todo with due date")
         void shouldCreateTodoWithDueDate() {
-            sampleRequest.setDueDate("2024-12-31T23:59");
+            TodoRequest withDueDate = new TodoRequest("Test Todo", "Test description",
+                    Priority.MEDIUM, TodoStatus.PENDING, "2024-12-31T23:59");
             sampleTodo.setDueDate(LocalDateTime.of(2024, 12, 31, 23, 59));
             when(todoRepository.save(any(Todo.class))).thenReturn(sampleTodo);
 
-            TodoResponse response = todoService.createTodo(sampleRequest);
+            TodoResponse response = todoService.createTodo(withDueDate);
 
             assertThat(response).isNotNull();
-            assertThat(response.getDueDate()).isNotNull();
+            assertThat(response.dueDate()).isNotNull();
             verify(todoRepository).save(any(Todo.class));
         }
 
         @Test
         @DisplayName("Should create todo with explicit status")
         void shouldCreateTodoWithExplicitStatus() {
-            sampleRequest.setStatus(TodoStatus.IN_PROGRESS);
+            TodoRequest inProgressRequest = new TodoRequest("Test Todo", "Test description",
+                    Priority.MEDIUM, TodoStatus.IN_PROGRESS, null);
             sampleTodo.setStatus(TodoStatus.IN_PROGRESS);
             when(todoRepository.save(any(Todo.class))).thenReturn(sampleTodo);
 
-            TodoResponse response = todoService.createTodo(sampleRequest);
+            TodoResponse response = todoService.createTodo(inProgressRequest);
 
-            assertThat(response.getStatus()).isEqualTo(TodoStatus.IN_PROGRESS);
+            assertThat(response.status()).isEqualTo(TodoStatus.IN_PROGRESS);
         }
 
         @Test
-        @DisplayName("Should create todo with null status defaulting to PENDING")
+        @DisplayName("Should default to PENDING status when null is passed to record")
         void shouldDefaultToPendingWhenStatusNull() {
-            sampleRequest.setStatus(null);
+            TodoRequest nullStatusRequest = new TodoRequest("Test Todo", "Test description",
+                    Priority.MEDIUM, null, null);
             when(todoRepository.save(any(Todo.class))).thenReturn(sampleTodo);
 
-            TodoResponse response = todoService.createTodo(sampleRequest);
+            TodoResponse response = todoService.createTodo(nullStatusRequest);
 
-            assertThat(response.getStatus()).isEqualTo(TodoStatus.PENDING);
+            assertThat(nullStatusRequest.status()).isEqualTo(TodoStatus.PENDING);
+            assertThat(response.status()).isEqualTo(TodoStatus.PENDING);
         }
     }
 
@@ -129,8 +130,8 @@ class TodoServiceTest {
             TodoResponse response = todoService.getTodoById(1L);
 
             assertThat(response).isNotNull();
-            assertThat(response.getId()).isEqualTo(1L);
-            assertThat(response.getTitle()).isEqualTo("Test Todo");
+            assertThat(response.id()).isEqualTo(1L);
+            assertThat(response.title()).isEqualTo("Test Todo");
         }
 
         @Test
@@ -157,7 +158,7 @@ class TodoServiceTest {
             Page<TodoResponse> result = todoService.getAllTodos(0, 10, "createdAt", "desc");
 
             assertThat(result.getContent()).hasSize(1);
-            assertThat(result.getContent().get(0).getTitle()).isEqualTo("Test Todo");
+            assertThat(result.getContent().get(0).title()).isEqualTo("Test Todo");
         }
 
         @Test
@@ -179,12 +180,8 @@ class TodoServiceTest {
         @Test
         @DisplayName("Should update all fields of an existing todo")
         void shouldUpdateAllFields() {
-            TodoRequest updateRequest = new TodoRequest();
-            updateRequest.setTitle("Updated Title");
-            updateRequest.setDescription("Updated description");
-            updateRequest.setPriority(Priority.HIGH);
-            updateRequest.setStatus(TodoStatus.IN_PROGRESS);
-            updateRequest.setDueDate("2024-12-31T23:59");
+            TodoRequest updateRequest = new TodoRequest("Updated Title", "Updated description",
+                    Priority.HIGH, TodoStatus.IN_PROGRESS, "2024-12-31T23:59");
 
             Todo updatedTodo = new Todo("Updated Title", "Updated description", Priority.HIGH);
             updatedTodo.setId(1L);
@@ -198,20 +195,17 @@ class TodoServiceTest {
 
             TodoResponse response = todoService.updateTodo(1L, updateRequest);
 
-            assertThat(response.getTitle()).isEqualTo("Updated Title");
-            assertThat(response.getPriority()).isEqualTo(Priority.HIGH);
-            assertThat(response.getStatus()).isEqualTo(TodoStatus.IN_PROGRESS);
+            assertThat(response.title()).isEqualTo("Updated Title");
+            assertThat(response.priority()).isEqualTo(Priority.HIGH);
+            assertThat(response.status()).isEqualTo(TodoStatus.IN_PROGRESS);
             verify(todoRepository).save(any(Todo.class));
         }
 
         @Test
         @DisplayName("Should clear due date when not provided")
         void shouldClearDueDate() {
-            TodoRequest updateRequest = new TodoRequest();
-            updateRequest.setTitle("Test");
-            updateRequest.setPriority(Priority.MEDIUM);
-            updateRequest.setStatus(TodoStatus.PENDING);
-            updateRequest.setDueDate(null);
+            TodoRequest updateRequest = new TodoRequest("Test", null,
+                    Priority.MEDIUM, TodoStatus.PENDING, null);
 
             when(todoRepository.findById(1L)).thenReturn(Optional.of(sampleTodo));
             when(todoRepository.save(any(Todo.class))).thenReturn(sampleTodo);
@@ -278,7 +272,7 @@ class TodoServiceTest {
 
             TodoResponse response = todoService.toggleComplete(1L);
 
-            assertThat(response.getStatus()).isEqualTo(TodoStatus.COMPLETED);
+            assertThat(response.status()).isEqualTo(TodoStatus.COMPLETED);
         }
 
         @Test
@@ -296,7 +290,7 @@ class TodoServiceTest {
 
             TodoResponse response = todoService.toggleComplete(1L);
 
-            assertThat(response.getStatus()).isEqualTo(TodoStatus.PENDING);
+            assertThat(response.status()).isEqualTo(TodoStatus.PENDING);
         }
 
         @Test

@@ -73,12 +73,10 @@ public class Todo {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-        if (this.status == TodoStatus.COMPLETED && this.completedAt == null) {
-            this.completedAt = LocalDateTime.now();
-        }
-        if (this.status != TodoStatus.COMPLETED) {
-            this.completedAt = null;
-        }
+        this.completedAt = switch (this.status) {
+            case COMPLETED -> this.completedAt != null ? this.completedAt : LocalDateTime.now();
+            case PENDING, IN_PROGRESS, CANCELLED -> null;
+        };
     }
 
     public Long getId() {

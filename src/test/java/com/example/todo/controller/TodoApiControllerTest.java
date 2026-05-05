@@ -20,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -60,20 +59,14 @@ class TodoApiControllerTest {
 
     @BeforeEach
     void setUp() {
-        sampleResponse = new TodoResponse();
-        sampleResponse.setId(1L);
-        sampleResponse.setTitle("Test Todo");
-        sampleResponse.setDescription("Test description");
-        sampleResponse.setStatus(TodoStatus.PENDING);
-        sampleResponse.setPriority(Priority.MEDIUM);
-        sampleResponse.setCreatedAt("2024-01-01 10:00");
-        sampleResponse.setUpdatedAt("2024-01-01 10:00");
+        sampleResponse = new TodoResponse(
+                1L, "Test Todo", "Test description",
+                TodoStatus.PENDING, Priority.MEDIUM,
+                null, "2024-01-01 10:00", "2024-01-01 10:00", null, false
+        );
 
-        sampleRequest = new TodoRequest();
-        sampleRequest.setTitle("Test Todo");
-        sampleRequest.setDescription("Test description");
-        sampleRequest.setPriority(Priority.MEDIUM);
-        sampleRequest.setStatus(TodoStatus.PENDING);
+        sampleRequest = new TodoRequest("Test Todo", "Test description",
+                Priority.MEDIUM, TodoStatus.PENDING, null);
     }
 
     @Nested
@@ -100,56 +93,56 @@ class TodoApiControllerTest {
         @Test
         @DisplayName("Should return 400 when title is blank")
         void shouldReturn400WhenTitleBlank() throws Exception {
-            sampleRequest.setTitle("");
+            TodoRequest blankTitle = new TodoRequest("", "Test description",
+                    Priority.MEDIUM, TodoStatus.PENDING, null);
 
             mockMvc.perform(post("/api/todos")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(sampleRequest)))
+                            .content(objectMapper.writeValueAsString(blankTitle)))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("Should return 400 when title is null")
         void shouldReturn400WhenTitleNull() throws Exception {
-            sampleRequest.setTitle(null);
+            TodoRequest nullTitle = new TodoRequest(null, "Test description",
+                    Priority.MEDIUM, TodoStatus.PENDING, null);
 
             mockMvc.perform(post("/api/todos")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(sampleRequest)))
+                            .content(objectMapper.writeValueAsString(nullTitle)))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("Should return 400 when title exceeds max length")
         void shouldReturn400WhenTitleTooLong() throws Exception {
-            sampleRequest.setTitle("A".repeat(256));
+            TodoRequest longTitle = new TodoRequest("A".repeat(256), "Test description",
+                    Priority.MEDIUM, TodoStatus.PENDING, null);
 
             mockMvc.perform(post("/api/todos")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(sampleRequest)))
+                            .content(objectMapper.writeValueAsString(longTitle)))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("Should create todo with all fields populated")
         void shouldCreateTodoWithAllFields() throws Exception {
-            sampleRequest.setDueDate("2024-12-31T23:59");
-            sampleRequest.setPriority(Priority.HIGH);
-            sampleRequest.setStatus(TodoStatus.IN_PROGRESS);
+            TodoRequest fullRequest = new TodoRequest("Test Todo", "Test description",
+                    Priority.HIGH, TodoStatus.IN_PROGRESS, "2024-12-31T23:59");
 
-            TodoResponse fullResponse = new TodoResponse();
-            fullResponse.setId(2L);
-            fullResponse.setTitle("Test Todo");
-            fullResponse.setDescription("Test description");
-            fullResponse.setStatus(TodoStatus.IN_PROGRESS);
-            fullResponse.setPriority(Priority.HIGH);
-            fullResponse.setDueDate("2024-12-31 23:59");
+            TodoResponse fullResponse = new TodoResponse(
+                    2L, "Test Todo", "Test description",
+                    TodoStatus.IN_PROGRESS, Priority.HIGH,
+                    "2024-12-31 23:59", null, null, null, false
+            );
 
             when(todoService.createTodo(any(TodoRequest.class))).thenReturn(fullResponse);
 
             mockMvc.perform(post("/api/todos")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(sampleRequest)))
+                            .content(objectMapper.writeValueAsString(fullRequest)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.priority", is("HIGH")))
                     .andExpect(jsonPath("$.status", is("IN_PROGRESS")));
@@ -260,23 +253,20 @@ class TodoApiControllerTest {
         @Test
         @DisplayName("Should update todo and return 200")
         void shouldUpdateTodo() throws Exception {
-            TodoResponse updatedResponse = new TodoResponse();
-            updatedResponse.setId(1L);
-            updatedResponse.setTitle("Updated Title");
-            updatedResponse.setDescription("Updated description");
-            updatedResponse.setStatus(TodoStatus.IN_PROGRESS);
-            updatedResponse.setPriority(Priority.HIGH);
+            TodoResponse updatedResponse = new TodoResponse(
+                    1L, "Updated Title", "Updated description",
+                    TodoStatus.IN_PROGRESS, Priority.HIGH,
+                    null, null, null, null, false
+            );
 
-            sampleRequest.setTitle("Updated Title");
-            sampleRequest.setDescription("Updated description");
-            sampleRequest.setPriority(Priority.HIGH);
-            sampleRequest.setStatus(TodoStatus.IN_PROGRESS);
+            TodoRequest updateRequest = new TodoRequest("Updated Title", "Updated description",
+                    Priority.HIGH, TodoStatus.IN_PROGRESS, null);
 
             when(todoService.updateTodo(eq(1L), any(TodoRequest.class))).thenReturn(updatedResponse);
 
             mockMvc.perform(put("/api/todos/1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(sampleRequest)))
+                            .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.title", is("Updated Title")))
                     .andExpect(jsonPath("$.status", is("IN_PROGRESS")))
@@ -300,11 +290,12 @@ class TodoApiControllerTest {
         @Test
         @DisplayName("Should return 400 when update payload is invalid")
         void shouldReturn400WhenUpdateInvalid() throws Exception {
-            sampleRequest.setTitle("");
+            TodoRequest invalid = new TodoRequest("", "Test description",
+                    Priority.MEDIUM, TodoStatus.PENDING, null);
 
             mockMvc.perform(put("/api/todos/1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(sampleRequest)))
+                            .content(objectMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest());
         }
     }
@@ -316,10 +307,11 @@ class TodoApiControllerTest {
         @Test
         @DisplayName("Should toggle todo completion status")
         void shouldToggleComplete() throws Exception {
-            TodoResponse toggledResponse = new TodoResponse();
-            toggledResponse.setId(1L);
-            toggledResponse.setTitle("Test Todo");
-            toggledResponse.setStatus(TodoStatus.COMPLETED);
+            TodoResponse toggledResponse = new TodoResponse(
+                    1L, "Test Todo", null,
+                    TodoStatus.COMPLETED, null,
+                    null, null, null, null, false
+            );
 
             when(todoService.toggleComplete(1L)).thenReturn(toggledResponse);
 
@@ -370,13 +362,14 @@ class TodoApiControllerTest {
         @Test
         @DisplayName("Should return todo statistics")
         void shouldReturnStatistics() throws Exception {
-            Map<String, Object> stats = new HashMap<>();
-            stats.put("total", 10L);
-            stats.put("pending", 4L);
-            stats.put("inProgress", 3L);
-            stats.put("completed", 2L);
-            stats.put("cancelled", 1L);
-            stats.put("overdue", 2);
+            Map<String, Object> stats = Map.of(
+                    "total", 10L,
+                    "pending", 4L,
+                    "inProgress", 3L,
+                    "completed", 2L,
+                    "cancelled", 1L,
+                    "overdue", 2
+            );
 
             when(todoService.getTodoStatistics()).thenReturn(stats);
 
