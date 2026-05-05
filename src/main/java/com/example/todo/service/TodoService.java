@@ -18,10 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -37,15 +35,15 @@ public class TodoService {
     }
 
     public TodoResponse createTodo(TodoRequest request) {
-        log.info("Creating new todo: {}", request.getTitle());
+        log.info("Creating new todo: {}", request.title());
         Todo todo = new Todo();
-        todo.setTitle(request.getTitle());
-        todo.setDescription(request.getDescription());
-        todo.setPriority(request.getPriority());
-        todo.setStatus(request.getStatus() != null ? request.getStatus() : TodoStatus.PENDING);
+        todo.setTitle(request.title());
+        todo.setDescription(request.description());
+        todo.setPriority(request.priority());
+        todo.setStatus(request.status() != null ? request.status() : TodoStatus.PENDING);
 
-        if (request.getDueDate() != null && !request.getDueDate().isEmpty()) {
-            todo.setDueDate(LocalDateTime.parse(request.getDueDate(), DATE_FORMATTER));
+        if (request.dueDate() != null && !request.dueDate().isEmpty()) {
+            todo.setDueDate(LocalDateTime.parse(request.dueDate(), DATE_FORMATTER));
         }
 
         Todo saved = todoRepository.save(todo);
@@ -93,13 +91,13 @@ public class TodoService {
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new TodoNotFoundException(id));
 
-        todo.setTitle(request.getTitle());
-        todo.setDescription(request.getDescription());
-        todo.setPriority(request.getPriority());
-        todo.setStatus(request.getStatus());
+        todo.setTitle(request.title());
+        todo.setDescription(request.description());
+        todo.setPriority(request.priority());
+        todo.setStatus(request.status());
 
-        if (request.getDueDate() != null && !request.getDueDate().isEmpty()) {
-            todo.setDueDate(LocalDateTime.parse(request.getDueDate(), DATE_FORMATTER));
+        if (request.dueDate() != null && !request.dueDate().isEmpty()) {
+            todo.setDueDate(LocalDateTime.parse(request.dueDate(), DATE_FORMATTER));
         } else {
             todo.setDueDate(null);
         }
@@ -122,11 +120,11 @@ public class TodoService {
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new TodoNotFoundException(id));
 
-        if (todo.getStatus() == TodoStatus.COMPLETED) {
-            todo.setStatus(TodoStatus.PENDING);
-        } else {
-            todo.setStatus(TodoStatus.COMPLETED);
-        }
+        TodoStatus next = switch (todo.getStatus()) {
+            case COMPLETED -> TodoStatus.PENDING;
+            case PENDING, IN_PROGRESS, CANCELLED -> TodoStatus.COMPLETED;
+        };
+        todo.setStatus(next);
 
         Todo updated = todoRepository.save(todo);
         return TodoResponse.fromEntity(updated);
@@ -134,18 +132,17 @@ public class TodoService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> getTodoStatistics() {
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("total", todoRepository.count());
-        stats.put("pending", todoRepository.countByStatus(TodoStatus.PENDING));
-        stats.put("inProgress", todoRepository.countByStatus(TodoStatus.IN_PROGRESS));
-        stats.put("completed", todoRepository.countByStatus(TodoStatus.COMPLETED));
-        stats.put("cancelled", todoRepository.countByStatus(TodoStatus.CANCELLED));
-
         List<Todo> overdueTodos = todoRepository.findByDueDateBeforeAndStatusNot(
                 LocalDateTime.now(), TodoStatus.COMPLETED);
-        stats.put("overdue", overdueTodos.size());
 
-        return stats;
+        return Map.of(
+                "total", todoRepository.count(),
+                "pending", todoRepository.countByStatus(TodoStatus.PENDING),
+                "inProgress", todoRepository.countByStatus(TodoStatus.IN_PROGRESS),
+                "completed", todoRepository.countByStatus(TodoStatus.COMPLETED),
+                "cancelled", todoRepository.countByStatus(TodoStatus.CANCELLED),
+                "overdue", overdueTodos.size()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -156,15 +153,16 @@ public class TodoService {
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
+        Page<Todo> source;
         if (status != null && priority != null) {
-            return todoRepository.findByStatusAndPriority(status, priority, pageable)
-                    .map(TodoResponse::fromEntity);
+            source = todoRepository.findByStatusAndPriority(status, priority, pageable);
         } else if (status != null) {
-            return todoRepository.findByStatus(status, pageable).map(TodoResponse::fromEntity);
+            source = todoRepository.findByStatus(status, pageable);
         } else if (priority != null) {
-            return todoRepository.findByPriority(priority, pageable).map(TodoResponse::fromEntity);
+            source = todoRepository.findByPriority(priority, pageable);
         } else {
-            return todoRepository.findAll(pageable).map(TodoResponse::fromEntity);
+            source = todoRepository.findAll(pageable);
         }
+        return source.map(TodoResponse::fromEntity);
     }
 }

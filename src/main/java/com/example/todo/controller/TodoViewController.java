@@ -102,12 +102,13 @@ public class TodoViewController {
     public String showEditForm(@PathVariable Long id, Model model) {
         TodoResponse todo = todoService.getTodoById(id);
 
-        TodoRequest request = new TodoRequest();
-        request.setTitle(todo.getTitle());
-        request.setDescription(todo.getDescription());
-        request.setPriority(todo.getPriority());
-        request.setStatus(todo.getStatus());
-        request.setDueDate(todo.getDueDate() != null ? todo.getDueDate().replace(" ", "T") : null);
+        TodoRequest request = new TodoRequest(
+                todo.title(),
+                todo.description(),
+                todo.priority(),
+                todo.status(),
+                todo.dueDate() != null ? todo.dueDate().replace(" ", "T") : null
+        );
 
         model.addAttribute("todoRequest", request);
         model.addAttribute("todoId", id);
