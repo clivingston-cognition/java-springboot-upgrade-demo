@@ -9,6 +9,11 @@ build/
 .mvn/wrapper/maven-wrapper.jar
 !.mvn/wrapper/maven-wrapper.properties
 
+# Gradle (for future migration)
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.properties
+
 # IDE
 .idea/
 *.iml
