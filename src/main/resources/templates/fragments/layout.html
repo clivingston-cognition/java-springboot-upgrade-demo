@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head th:fragment="head(title)">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">TODO App</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${title}">Todo App</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
-
-<header th:fragment="header" class="header">
-    <div class="container">
-        <h1><a href="/" style="color:white;text-decoration:none;">TODO Manager</a></h1>
-        <p>Spring Boot 2.7 &middot; Java 11 &middot; H2 Database</p>
+<body>
+<nav th:fragment="navbar">
+    <div class="navbar">
+        <a th:href="@{/}" class="navbar-brand">Todo App</a>
+        <div class="navbar-links">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/todos/new}">New Todo</a>
+        </div>
     </div>
-</header>
+</nav>
 
+<footer th:fragment="footer">
+    <div class="footer">
+        <p>Spring Boot 3.3 &middot; Maven &middot; Thymeleaf &middot; H2</p>
+    </div>
+</footer>
+</body>
 </html>

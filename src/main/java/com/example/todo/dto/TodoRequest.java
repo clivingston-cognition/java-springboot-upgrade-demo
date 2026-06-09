@@ -2,36 +2,33 @@ package com.example.todo.dto;
 
 import com.example.todo.model.Priority;
 import com.example.todo.model.TodoStatus;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 
 public class TodoRequest {
 
     @NotBlank(message = "Title is required")
-    @Size(min = 1, max = 255, message = "Title must be between 1 and 255 characters")
+    @Size(max = 255, message = "Title must be at most 255 characters")
     private String title;
 
-    @Size(max = 2000, message = "Description must not exceed 2000 characters")
+    @Size(max = 1000, message = "Description must be at most 1000 characters")
     private String description;
 
-    @NotNull(message = "Priority is required")
-    private Priority priority = Priority.MEDIUM;
+    private TodoStatus status;
 
-    @NotNull(message = "Status is required")
-    private TodoStatus status = TodoStatus.PENDING;
+    private Priority priority;
 
-    private String dueDate;
+    private LocalDate dueDate;
 
     public TodoRequest() {
     }
 
-    public TodoRequest(String title, String description, Priority priority, TodoStatus status, String dueDate) {
+    public TodoRequest(String title, String description, TodoStatus status, Priority priority, LocalDate dueDate) {
         this.title = title;
         this.description = description;
-        this.priority = priority;
         this.status = status;
+        this.priority = priority;
         this.dueDate = dueDate;
     }
 
@@ -51,14 +48,6 @@ public class TodoRequest {
         this.description = description;
     }
 
-    public Priority getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Priority priority) {
-        this.priority = priority;
-    }
-
     public TodoStatus getStatus() {
         return status;
     }
@@ -67,11 +56,19 @@ public class TodoRequest {
         this.status = status;
     }
 
-    public String getDueDate() {
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(String dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 }

@@ -1,18 +1,16 @@
 package com.example.todo.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,27 +21,22 @@ public class Todo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title is required")
-    @Size(min = 1, max = 255, message = "Title must be between 1 and 255 characters")
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String title;
 
-    @Size(max = 2000, message = "Description must not exceed 2000 characters")
-    @Column(length = 2000)
+    @Column(length = 1000)
     private String description;
 
-    @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private TodoStatus status = TodoStatus.PENDING;
 
-    @NotNull(message = "Priority is required")
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private Priority priority = Priority.MEDIUM;
 
     @Column(name = "due_date")
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -51,17 +44,14 @@ public class Todo {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt;
-
     public Todo() {
     }
 
-    public Todo(String title, String description, Priority priority) {
+    public Todo(String title, String description, Priority priority, LocalDate dueDate) {
         this.title = title;
         this.description = description;
         this.priority = priority;
-        this.status = TodoStatus.PENDING;
+        this.dueDate = dueDate;
     }
 
     @PrePersist
@@ -73,12 +63,6 @@ public class Todo {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-        if (this.status == TodoStatus.COMPLETED && this.completedAt == null) {
-            this.completedAt = LocalDateTime.now();
-        }
-        if (this.status != TodoStatus.COMPLETED) {
-            this.completedAt = null;
-        }
     }
 
     public Long getId() {
@@ -121,11 +105,11 @@ public class Todo {
         this.priority = priority;
     }
 
-    public LocalDateTime getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(LocalDateTime dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 
@@ -143,26 +127,5 @@ public class Todo {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public LocalDateTime getCompletedAt() {
-        return completedAt;
-    }
-
-    public void setCompletedAt(LocalDateTime completedAt) {
-        this.completedAt = completedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "Todo{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", status=" + status +
-                ", priority=" + priority +
-                ", dueDate=" + dueDate +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }

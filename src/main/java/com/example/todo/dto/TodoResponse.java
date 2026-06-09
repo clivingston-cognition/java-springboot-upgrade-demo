@@ -3,24 +3,19 @@ package com.example.todo.dto;
 import com.example.todo.model.Priority;
 import com.example.todo.model.Todo;
 import com.example.todo.model.TodoStatus;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class TodoResponse {
-
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private Long id;
     private String title;
     private String description;
     private TodoStatus status;
     private Priority priority;
-    private String dueDate;
-    private String createdAt;
-    private String updatedAt;
-    private String completedAt;
-    private boolean overdue;
+    private LocalDate dueDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public TodoResponse() {
     }
@@ -32,26 +27,9 @@ public class TodoResponse {
         response.setDescription(todo.getDescription());
         response.setStatus(todo.getStatus());
         response.setPriority(todo.getPriority());
-
-        if (todo.getDueDate() != null) {
-            response.setDueDate(todo.getDueDate().format(FORMATTER));
-            response.setOverdue(todo.getDueDate().isBefore(LocalDateTime.now())
-                    && todo.getStatus() != TodoStatus.COMPLETED
-                    && todo.getStatus() != TodoStatus.CANCELLED);
-        }
-
-        if (todo.getCreatedAt() != null) {
-            response.setCreatedAt(todo.getCreatedAt().format(FORMATTER));
-        }
-
-        if (todo.getUpdatedAt() != null) {
-            response.setUpdatedAt(todo.getUpdatedAt().format(FORMATTER));
-        }
-
-        if (todo.getCompletedAt() != null) {
-            response.setCompletedAt(todo.getCompletedAt().format(FORMATTER));
-        }
-
+        response.setDueDate(todo.getDueDate());
+        response.setCreatedAt(todo.getCreatedAt());
+        response.setUpdatedAt(todo.getUpdatedAt());
         return response;
     }
 
@@ -95,43 +73,27 @@ public class TodoResponse {
         this.priority = priority;
     }
 
-    public String getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(String dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public String getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(String updatedAt) {
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getCompletedAt() {
-        return completedAt;
-    }
-
-    public void setCompletedAt(String completedAt) {
-        this.completedAt = completedAt;
-    }
-
-    public boolean isOverdue() {
-        return overdue;
-    }
-
-    public void setOverdue(boolean overdue) {
-        this.overdue = overdue;
     }
 }
