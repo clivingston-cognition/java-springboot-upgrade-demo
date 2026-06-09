@@ -1,8 +1,6 @@
 # TODO Manager - Spring Boot Application
 
-A sophisticated TODO list application built with **Java 11** and **Spring Boot 2.7.18**, featuring full CRUD operations, a Thymeleaf web UI, H2 embedded database with Flyway migrations, and comprehensive test coverage.
-
-> **Note:** This application intentionally uses outdated versions (Java 11 + Spring Boot 2.7.x) — two major releases behind the current Java 21 + Spring Boot 3.x ecosystem.
+A sophisticated TODO list application built with **Java 17** and **Spring Boot 3.4.5**, featuring full CRUD operations, a Thymeleaf web UI, H2 embedded database with Flyway migrations, and comprehensive test coverage.
 
 ---
 
@@ -10,15 +8,15 @@ A sophisticated TODO list application built with **Java 11** and **Spring Boot 2
 
 | Component        | Version / Technology       |
 |------------------|----------------------------|
-| Java             | 11 (LTS)                   |
-| Spring Boot      | 2.7.18                     |
+| Java             | 17 (LTS)                   |
+| Spring Boot      | 3.4.5                      |
 | Database         | H2 (embedded, file-based)  |
 | ORM              | Spring Data JPA / Hibernate|
 | Migrations       | Flyway                     |
 | UI               | Thymeleaf + CSS            |
 | Validation       | Hibernate Validator (JSR-380) |
 | Testing          | JUnit 5 + Mockito + MockMvc|
-| Build Tool       | Maven 3.8+                 |
+| Build Tool       | Gradle 8.12                |
 
 ---
 
@@ -42,14 +40,14 @@ A sophisticated TODO list application built with **Java 11** and **Spring Boot 2
 
 ## Prerequisites
 
-- **Java 11** (JDK) — [Download](https://adoptium.net/temurin/releases/?version=11)
-- **Maven 3.8+** — [Download](https://maven.apache.org/download.cgi) (or use the included Maven Wrapper)
+- **Java 17** (JDK) — [Download](https://adoptium.net/temurin/releases/?version=17)
+- **Gradle 8.12** — (included via Gradle Wrapper; no separate install required)
 
 Verify your setup:
 
 ```bash
-java -version   # Should show version 11.x
-mvn -version    # Should show 3.8+
+java -version      # Should show version 17.x
+./gradlew --version  # Should show Gradle 8.12
 ```
 
 ---
@@ -66,23 +64,19 @@ cd java-springboot-upgrade-demo
 ### 2. Build the Application
 
 ```bash
-# Using Maven Wrapper (recommended)
-./mvnw clean package
-
-# Or using system Maven
-mvn clean package
+./gradlew clean build
 ```
 
-This compiles the code, runs all tests, and produces a JAR in `target/`.
+This compiles the code, runs all tests, and produces a JAR in `build/libs/`.
 
 ### 3. Run the Application
 
 ```bash
-# Using Maven Wrapper
-./mvnw spring-boot:run
+# Using Gradle Wrapper
+./gradlew bootRun
 
 # Or run the JAR directly
-java -jar target/todo-app-1.0.0-SNAPSHOT.jar
+java -jar build/libs/todo-app-1.0.0-SNAPSHOT.jar
 ```
 
 The application starts on **http://localhost:8080**.
@@ -107,33 +101,30 @@ The application starts on **http://localhost:8080**.
 ### Run All Tests
 
 ```bash
-# Unit tests + Integration tests
-./mvnw clean test
+# Unit tests only
+./gradlew test
 
-# Or with verbose output
-./mvnw clean test -X
+# Integration tests only
+./gradlew integrationTest
+
+# Both unit + integration tests
+./gradlew check
 ```
 
 ### Run Specific Test Classes
 
 ```bash
 # API Controller tests only
-./mvnw test -Dtest=TodoApiControllerTest
+./gradlew test --tests 'com.example.todo.controller.TodoApiControllerTest'
 
 # Service layer tests only
-./mvnw test -Dtest=TodoServiceTest
+./gradlew test --tests 'com.example.todo.service.TodoServiceTest'
 
 # Repository tests only
-./mvnw test -Dtest=TodoRepositoryTest
+./gradlew test --tests 'com.example.todo.repository.TodoRepositoryTest'
 
 # Integration tests only
-./mvnw test -Dtest=TodoIntegrationTest
-```
-
-### Run Integration Tests with Failsafe
-
-```bash
-./mvnw clean verify
+./gradlew integrationTest --tests 'com.example.todo.integration.TodoIntegrationTest'
 ```
 
 ### Test Coverage Summary
@@ -212,7 +203,9 @@ curl http://localhost:8080/api/todos/stats
 ## Project Structure
 
 ```
-├── pom.xml                          # Maven build configuration
+├── build.gradle                     # Gradle build configuration
+├── settings.gradle                  # Gradle settings
+├── gradle/                          # Gradle wrapper
 ├── README.md                        # This file
 ├── src/
 │   ├── main/
@@ -268,8 +261,8 @@ curl http://localhost:8080/api/todos/stats
 
 | Issue                              | Solution                                                |
 |------------------------------------|---------------------------------------------------------|
-| `java: unsupported class version`  | Ensure JAVA_HOME points to JDK 11                      |
+| `java: unsupported class version`  | Ensure JAVA_HOME points to JDK 17                      |
 | Port 8080 in use                   | `server.port=9090` in application.properties or `-Dserver.port=9090` |
 | H2 database locked                 | Stop other instances; delete `./data/tododb.mv.db`     |
-| Tests failing                      | Run `./mvnw clean test` for a clean build               |
+| Tests failing                      | Run `./gradlew clean test` for a clean build             |
 | Flyway migration error             | Delete `./data/` directory and restart                   |
